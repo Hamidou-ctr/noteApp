@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "noteapp-ddba3": {
+      "hosting": {
+        "danotes": [
+          "noteapp-ddba3"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "noteapp-ddba3"
+  }
+}
