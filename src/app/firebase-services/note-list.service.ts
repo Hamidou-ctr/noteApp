@@ -6,6 +6,8 @@ import {
   doc,
   collectionData,
   onSnapshot,
+  addDoc,
+  updateDoc,
 } from '@angular/fire/firestore';
 import { UnsubscriptionError } from 'rxjs';
 
@@ -16,16 +18,53 @@ export class NoteListService {
   trashNotes: Note[] = [];
   normalNotes: Note[] = [];
 
-
   unsubNotes;
   unsubTrash;
-
 
   firestore = inject(Firestore);
 
   constructor() {
     this.unsubTrash = this.subTrashList();
     this.unsubNotes = this.subNotesList();
+  }
+  
+
+  async updateNote(note: Note) {
+    if(note.id){
+      let docRef = this.getSingleDocRef(this.getColIdFromNote(note), note.id);
+      await updateDoc(docRef, this.getCleanJson(note)).catch(
+        (err) => {
+          console.log('Error updating document: ', err);
+        }
+      );
+    }
+  }
+
+  getCleanJson(note: Note):{} {
+    return {
+      type: note.type,
+      title: note.title,
+      content: note.content,
+      marked: note.marked,
+    };
+  }
+
+  getColIdFromNote(note:Note){
+    if(note.type == 'note'){
+      return 'notes';
+    } else {
+      return 'trash';
+    }
+  }
+
+  async addNote(item: Note) {
+    await addDoc(this.getNoteRef(), item)
+      .catch((err) => {
+        console.error(err);
+      })
+      .then((docRef) => {
+        console.log('Document written with ID: ', docRef?.id);
+      });
   }
 
   ngOnDestroy() {
@@ -50,14 +89,12 @@ export class NoteListService {
     });
   }
 
-
-
   setNoteObject(obj: any, id: string): Note {
     return {
-      id: id || "",
-      type: obj.type || "note",
-      title: obj.title || "",
-      content: obj.content || "",
+      id: id || '',
+      type: obj.type || 'note',
+      title: obj.title || '',
+      content: obj.content || '',
       marked: obj.marked || false,
     };
   }
